@@ -21,14 +21,16 @@ COPY requirements.txt /opt/CTFd/
 
 RUN pip install -r requirements.txt --no-cache-dir
 
+RUN pip install kubernetes==25.3.0 Flask-APScheduler==1.11.0 flask-redis==0.4.0 redis==3.3.11 docker==4.1.0
+
 COPY . /opt/CTFd
 
 # hadolint ignore=SC2086
-RUN for d in CTFd/plugins/*; do \
-        if [ -f "$d/requirements.txt" ]; then \
-            pip install -r $d/requirements.txt --no-cache-dir; \
-        fi; \
-    done;
+# RUN for d in CTFd/plugins/*; do \
+#         if [ -f "$d/requirements.txt" ]; then \
+#             pip install -r $d/requirements.txt --no-cache-dir; \
+#         fi; \
+#     done;
 
 # hadolint ignore=DL3059
 RUN adduser \
