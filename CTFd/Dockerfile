@@ -44,4 +44,4 @@ RUN adduser \
 
 USER 1001
 EXPOSE 8000
-ENTRYPOINT ["/opt/CTFd/docker-entrypoint.sh"]
+ENTRYPOINT ["su", "ctfd", "-c", "/opt/CTFd/docker-entrypoint.sh"]
