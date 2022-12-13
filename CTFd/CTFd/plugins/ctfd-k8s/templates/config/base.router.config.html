@@ -9,7 +9,7 @@
             </small>
         </label>
         <select id="router-type" class="form-control custom-select" onchange="window.updateConfigs">
-            {% for type in ["frp", "trp"] %}
+            {% for type in ["k8s"] %}
                 <option value="{{ type }}" {{ "selected" if value == type }}>{{ type }}</option>
             {% endfor %}
         </select>

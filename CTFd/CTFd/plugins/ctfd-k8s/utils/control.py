@@ -17,11 +17,11 @@ class ControlUtil:
             DBContainer.remove_container_record(user_id)
             print(traceback.format_exc())
             return False, 'Kubernetes Creation Error'
-        # ok, msg = Router.register(container)
-        # if not ok:
-        #     KubernetesUtils.remove_container(container)
-        #     DBContainer.remove_container_record(user_id)
-        #     return False, msg
+        ok, msg = Router.register(container)
+        if not ok:
+            KubernetesUtils.remove_container(container)
+            DBContainer.remove_container_record(user_id)
+            return False, msg
         return True, 'Container created'
 
     @staticmethod
@@ -31,9 +31,9 @@ class ControlUtil:
             return False, 'No such container'
         for _ in range(3):  # configurable? as "onerror_retry_cnt"
             try:
-                # ok, msg = Router.unregister(container)
-                # if not ok:
-                #     return False, msg
+                ok, msg = Router.unregister(container)
+                if not ok:
+                    return False, msg
                 KubernetesUtils.remove_container(container)
                 DBContainer.remove_container_record(user_id)
                 return True, 'Container destroyed'

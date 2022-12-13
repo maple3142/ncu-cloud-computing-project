@@ -7,7 +7,7 @@ from kubernetes import client, config
 import subprocess
 from flask import current_app
 
-from CTFd.utils import get_config
+from CTFd.utils import get_config, logging
 from CTFd.models import db
 
 from ..models import KubernetesContainer
@@ -77,25 +77,32 @@ class KubernetesUtils:
                     "Kubernetes Service Error\n" "Failed to apply service"
                 )
             service = services[0]
-            print(
-                f"{service.metadata.name} {[(p.node_port, p.port, p.target_port) for p in service.spec.ports]}"
+            logging.log(
+                'kubernetes',
+                f"Created {service.metadata.name} {[(p.node_port, p.port, p.target_port) for p in service.spec.ports]}"
             )
-            node_port = service.spec.ports[0].node_port
-            pods = KubernetesUtils.v1.list_namespaced_pod(
+    
+    @staticmethod
+    def get_container_connection_info(container: KubernetesContainer):
+        chal_id, short_id = get_challenge_id(container)
+        chal_selector = f"chal-id={chal_id}"
+        services = KubernetesUtils.v1.list_namespaced_service(
                 namespace="default", label_selector=chal_selector
             ).items
-            target_node_name = pods[0].spec.node_name
-            nodes = KubernetesUtils.v1.list_node()
-            node = [n for n in nodes.items if n.metadata.name == target_node_name][0]
-            external_ip = [
+        service = services[0]
+        node_port = service.spec.ports[0].node_port
+        pods = KubernetesUtils.v1.list_namespaced_pod(
+                namespace="default", label_selector=chal_selector
+            ).items
+        target_node_name = pods[0].spec.node_name
+        nodes = KubernetesUtils.v1.list_node()
+        node = [n for n in nodes.items if n.metadata.name == target_node_name][0]
+        external_ip = [
                 addr.address
                 for addr in node.status.addresses
                 if addr.type == "ExternalIP"
             ][0]
-
-            container.host = external_ip
-            container.port = node_port
-            db.session.commit()
+        return external_ip, node_port
 
     @staticmethod
     def remove_container(container):

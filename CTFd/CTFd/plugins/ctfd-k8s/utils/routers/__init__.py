@@ -1,11 +1,9 @@
 from CTFd.utils import get_config
 
-from .frp import FrpRouter
-from .trp import TrpRouter
+from .k8s import K8sRouter
 
 _routers = {
-    'frp': FrpRouter,
-    'trp': TrpRouter,
+    'k8s': K8sRouter,
 }
 
 
@@ -19,7 +17,7 @@ class Router:
     _router = None
 
     def __getattr__(self, name: str):
-        router_conftype = get_config("kubernetes:router_type", "frp")
+        router_conftype = get_config("kubernetes:router_type", "k8s")
         if Router._name != router_conftype:
             Router._router = _routers[router_conftype]()
             Router._name = router_conftype
