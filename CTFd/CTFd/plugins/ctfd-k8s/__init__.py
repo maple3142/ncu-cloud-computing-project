@@ -19,7 +19,7 @@ from .challenge_type import DynamicValueKubernetesChallenge, DynamicKubernetesCh
 from .utils.checks import KubernetesChecks
 from .utils.control import ControlUtil
 from .utils.db import DBContainer
-from .utils.docker import KubernetesUtils
+from .utils.kubernetes import KubernetesUtils
 from .utils.exceptions import KubernetesWarning
 from .utils.setup import setup_default_configs
 from .utils.routers import Router

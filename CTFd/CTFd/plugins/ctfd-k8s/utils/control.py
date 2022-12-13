@@ -3,7 +3,7 @@ import traceback
 
 from CTFd.utils import get_config
 from .db import DBContainer, db
-from .docker import KubernetesUtils
+from .kubernetes import KubernetesUtils
 from .routers import Router
 
 
