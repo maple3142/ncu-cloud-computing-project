@@ -15,55 +15,54 @@ from CTFd.utils import get_config, set_config
 from CTFd.utils.decorators import admins_only
 
 from .api import user_namespace, admin_namespace, AdminContainers
-from .challenge_type import DynamicValueDockerChallenge
-from .utils.checks import WhaleChecks
+from .challenge_type import DynamicValueKubernetesChallenge, DynamicKubernetesChallenge
+from .utils.checks import KubernetesChecks
 from .utils.control import ControlUtil
 from .utils.db import DBContainer
-from .utils.docker import DockerUtils
-from .utils.exceptions import WhaleWarning
+from .utils.docker import KubernetesUtils
+from .utils.exceptions import KubernetesWarning
 from .utils.setup import setup_default_configs
 from .utils.routers import Router
 
 
 def load(app):
-    return
     # upgrade()
     plugin_name = __name__.split('.')[-1]
-    set_config('whale:plugin_name', plugin_name)
+    set_config('kubernetes:plugin_name', plugin_name)
     app.db.create_all()
-    if not get_config("whale:setup"):
+    if not get_config("kubernetes:setup"):
         setup_default_configs()
 
     register_plugin_assets_directory(
         app, base_path=f"/plugins/{plugin_name}/assets",
-        endpoint='plugins.ctfd-whale.assets'
+        endpoint='plugins.ctfd-kubernetes.assets'
     )
     register_admin_plugin_menu_bar(
-        title='Whale',
-        route='/plugins/ctfd-whale/admin/settings'
+        title='Kubernetes',
+        route='/plugins/ctfd-kubernetes/admin/settings'
     )
 
-    DynamicValueDockerChallenge.templates = {
+    DynamicValueKubernetesChallenge.templates = {
         "create": f"/plugins/{plugin_name}/assets/create.html",
         "update": f"/plugins/{plugin_name}/assets/update.html",
         "view": f"/plugins/{plugin_name}/assets/view.html",
     }
-    DynamicValueDockerChallenge.scripts = {
-        "create": "/plugins/ctfd-whale/assets/create.js",
-        "update": "/plugins/ctfd-whale/assets/update.js",
-        "view": "/plugins/ctfd-whale/assets/view.js",
+    DynamicValueKubernetesChallenge.scripts = {
+        "create": "/plugins/ctfd-kubernetes/assets/create.js",
+        "update": "/plugins/ctfd-kubernetes/assets/update.js",
+        "view": "/plugins/ctfd-kubernetes/assets/view.js",
     }
-    CHALLENGE_CLASSES["dynamic_docker"] = DynamicValueDockerChallenge
+    CHALLENGE_CLASSES["dynamic_kubernetes"] = DynamicValueKubernetesChallenge
 
     page_blueprint = Blueprint(
-        "ctfd-whale",
+        "ctfd-kubernetes",
         __name__,
         template_folder="templates",
         static_folder="assets",
-        url_prefix="/plugins/ctfd-whale"
+        url_prefix="/plugins/ctfd-kubernetes"
     )
-    CTFd_API_v1.add_namespace(admin_namespace, path="/plugins/ctfd-whale/admin")
-    CTFd_API_v1.add_namespace(user_namespace, path="/plugins/ctfd-whale")
+    CTFd_API_v1.add_namespace(admin_namespace, path="/plugins/ctfd-kubernetes/admin")
+    CTFd_API_v1.add_namespace(user_namespace, path="/plugins/ctfd-kubernetes")
 
     worker_config_commit = None
 
@@ -71,13 +70,13 @@ def load(app):
     @admins_only
     def admin_list_configs():
         nonlocal worker_config_commit
-        errors = WhaleChecks.perform()
-        if not errors and get_config("whale:refresh") != worker_config_commit:
-            worker_config_commit = get_config("whale:refresh")
-            DockerUtils.init()
+        errors = KubernetesChecks.perform()
+        if not errors and get_config("kubernetes:refresh") != worker_config_commit:
+            worker_config_commit = get_config("kubernetes:refresh")
+            KubernetesUtils.init()
             Router.reset()
-            set_config("whale:refresh", "false")
-        return render_template('whale_config.html', errors=errors)
+            set_config("kubernetes:refresh", "false")
+        return render_template('kubernetes_config.html', errors=errors)
 
     @page_blueprint.route("/admin/containers")
     @admins_only
@@ -85,7 +84,7 @@ def load(app):
         result = AdminContainers.get()
         view_mode = request.args.get('mode', session.get('view_mode', 'list'))
         session['view_mode'] = view_mode
-        return render_template("whale_containers.html",
+        return render_template("kubernetes_containers.html",
                                plugin_name=plugin_name,
                                containers=result['data']['containers'],
                                pages=result['data']['pages'],
@@ -102,12 +101,12 @@ def load(app):
 
     try:
         Router.check_availability()
-        DockerUtils.init()
+        KubernetesUtils.init()
     except Exception:
-        warnings.warn("Initialization Failed. Please check your configs.", WhaleWarning)
+        warnings.warn("Initialization Failed. Please check your configs.", KubernetesWarning)
 
     try:
-        lock_file = open("/tmp/ctfd_whale.lock", "w")
+        lock_file = open("/tmp/ctfd_kubernetes.lock", "w")
         lock_fd = lock_file.fileno()
         fcntl.lockf(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
@@ -115,10 +114,10 @@ def load(app):
         scheduler.init_app(app)
         scheduler.start()
         scheduler.add_job(
-            id='whale-auto-clean', func=auto_clean_container,
+            id='kubernetes-auto-clean', func=auto_clean_container,
             trigger="interval", seconds=10
         )
 
-        print("[CTFd Whale] Started successfully")
+        print("[CTFd Kubernetes] Started successfully")
     except IOError:
         pass
