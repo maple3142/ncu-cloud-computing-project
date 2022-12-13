@@ -16,10 +16,13 @@ services:
       - ACCESS_LOG=-
       - ERROR_LOG=-
       - REVERSE_PROXY=true
+      # - KUBECONFIG=/home/ctfd/kubeconfig
     volumes:
       - .data/CTFd/logs:/var/log/CTFd
       - .data/CTFd/uploads:/var/uploads
       - .:/opt/CTFd:ro
+      - ../secrets/aws_credentials:/home/ctfd/.aws/credentials:ro
+      # - ../secrets/kubeconfig:/home/ctfd/kubeconfig:ro
     depends_on:
       - db
     networks:

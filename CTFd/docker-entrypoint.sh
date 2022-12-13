@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+su ctfd -c 'aws eks update-kubeconfig --region us-east-1 --name CTFd-Instancer-Cluster'
 
 WORKERS=${WORKERS:-1}
 WORKER_CLASS=${WORKER_CLASS:-gevent}

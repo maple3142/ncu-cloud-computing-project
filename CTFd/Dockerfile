@@ -9,8 +9,13 @@ RUN apt-get update \
         libffi-dev \
         libssl-dev \
         git \
+        curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip install awscli
+RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /usr/bin/kubectl \
+    && chmod +x /usr/bin/kubectl
 
 COPY requirements.txt /opt/CTFd/
 
