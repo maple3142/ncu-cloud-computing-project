@@ -15,7 +15,15 @@
             </small>
         </label>
         <textarea class="form-control" name="kubernetes_config" placeholder="Kubernetes config template (yaml)" required></textarea>
-        <!-- <input type="text" class="form-control" name="docker_image" placeholder="Enter docker image name" required> -->
+    </div>
+    <div class="form-group">
+        <label for="value">Connection format<br>
+            <small class="form-text text-muted">
+                The text to be shown in the instance status area
+                Placeholders: <code>{host}</code>, <code>{port}</code> and <code>{ports}</code>
+            </small>
+        </label>
+        <textarea class="form-control" name="connection_format" placeholder="Connection format" required>nc {host} {port}</textarea>
     </div>
     <!-- <div class="form-group">
         <label for="value">Frp Redirect Type<br>

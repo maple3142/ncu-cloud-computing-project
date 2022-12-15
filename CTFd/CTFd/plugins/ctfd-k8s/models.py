@@ -46,6 +46,7 @@ class DynamicKubernetesChallenge(Challenges):
     dynamic_score = db.Column(db.Integer, default=0)
 
     kubernetes_config = db.Column(db.Text, default=0)
+    connection_format = db.Column(db.Text, default="nc {host} {port}")
 
     def __init__(self, *args, **kwargs):
         super(DynamicKubernetesChallenge, self).__init__(**kwargs)

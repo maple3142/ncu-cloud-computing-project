@@ -21,17 +21,19 @@ class K8sRouter(BaseRouter):
         pass
 
     def access(self, container: KubernetesContainer):
-        return f'host={container.host} ports={container.ports}'
+        return container.challenge.connection_format.format(
+            host=container.host, port=container.ports[0], ports=container.ports
+        )
 
     def register(self, container: KubernetesContainer):
         external_ip, ports = KubernetesUtils.get_container_connection_info(container)
         container.host = external_ip
         container.ports = ports
         db.session.commit()
-        return True, 'success'
+        return True, "success"
 
     def unregister(self, container: KubernetesContainer):
-        return True, 'success'
+        return True, "success"
 
     def check_availability(self):
-        return True, 'Available'
+        return True, "Available"
