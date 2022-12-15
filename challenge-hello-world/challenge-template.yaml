@@ -5,6 +5,7 @@ metadata:
   labels:
     chal-id: '{id}'
 spec:
+  automountServiceAccountToken: false
   containers:
   - name: chal
     image: 971703668052.dkr.ecr.us-east-1.amazonaws.com/challenge-registry:challenge-hello-world
@@ -12,6 +13,9 @@ spec:
     ports:
     - containerPort: 8888
       name: service-port
+    env:
+    - name: FLAG
+      value: {flag}
 ---
 apiVersion: v1
 kind: Service
