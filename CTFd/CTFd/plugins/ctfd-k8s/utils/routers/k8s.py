@@ -21,12 +21,12 @@ class K8sRouter(BaseRouter):
         pass
 
     def access(self, container: KubernetesContainer):
-        return f'nc {container.host} {container.port}'
+        return f'host={container.host} ports={container.ports}'
 
     def register(self, container: KubernetesContainer):
-        external_ip, node_port = KubernetesUtils.get_container_connection_info(container)
+        external_ip, ports = KubernetesUtils.get_container_connection_info(container)
         container.host = external_ip
-        container.port = node_port
+        container.ports = ports
         db.session.commit()
         return True, 'success'
 

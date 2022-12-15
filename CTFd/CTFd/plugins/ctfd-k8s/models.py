@@ -61,7 +61,7 @@ class KubernetesContainer(db.Model):
     status = db.Column(db.Integer, default=1)
     uuid = db.Column(db.String(256))
     host = db.Column(db.Text, nullable=True, default="0.0.0.0")
-    port = db.Column(db.Integer, nullable=True, default=0)
+    ports = db.Column(db.JSON, nullable=True, default=[])
     flag = db.Column(db.String(128), nullable=False)
 
     # Relationships

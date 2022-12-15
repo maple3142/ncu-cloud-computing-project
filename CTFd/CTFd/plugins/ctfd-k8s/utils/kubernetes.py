@@ -90,7 +90,7 @@ class KubernetesUtils:
                 namespace="default", label_selector=chal_selector
             ).items
         service = services[0]
-        node_port = service.spec.ports[0].node_port
+        ports = [port.node_port for port in service.spec.ports]
         pods = KubernetesUtils.v1.list_namespaced_pod(
                 namespace="default", label_selector=chal_selector
             ).items
@@ -102,7 +102,7 @@ class KubernetesUtils:
                 for addr in node.status.addresses
                 if addr.type == "ExternalIP"
             ][0]
-        return external_ip, node_port
+        return external_ip, ports
 
     @staticmethod
     def remove_container(container):
