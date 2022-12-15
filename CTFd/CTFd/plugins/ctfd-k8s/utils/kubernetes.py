@@ -44,6 +44,10 @@ def get_templated_yaml(container: KubernetesContainer):
         yield tmpf
 
 
+def get_namespace():
+    return get_config("kubernetes:kubernetes_namespace", "default")
+
+
 class KubernetesUtils:
     @staticmethod
     def init():
@@ -60,7 +64,7 @@ class KubernetesUtils:
         chal_selector = f"chal-id={chal_id}"
         with get_templated_yaml(container) as tmpf:
             proc = subprocess.run(
-                ["kubectl", "apply", "-f", tmpf.name],
+                ["kubectl", "apply", "-f", tmpf.name, "--namespace", get_namespace()],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
@@ -70,7 +74,7 @@ class KubernetesUtils:
                     f"{proc.stdout.decode()}\n{proc.stderr.decode()}"
                 )
             services = KubernetesUtils.v1.list_namespaced_service(
-                namespace="default", label_selector=chal_selector
+                namespace=get_namespace(), label_selector=chal_selector
             ).items
             if len(services) == 0:
                 raise KubernetesError(
@@ -78,30 +82,28 @@ class KubernetesUtils:
                 )
             service = services[0]
             logging.log(
-                'kubernetes',
-                f"Created {service.metadata.name} {[(p.node_port, p.port, p.target_port) for p in service.spec.ports]}"
+                "kubernetes",
+                f"Created {service.metadata.name} {[(p.node_port, p.port, p.target_port) for p in service.spec.ports]}",
             )
-    
+
     @staticmethod
     def get_container_connection_info(container: KubernetesContainer):
         chal_id, short_id = get_challenge_id(container)
         chal_selector = f"chal-id={chal_id}"
         services = KubernetesUtils.v1.list_namespaced_service(
-                namespace="default", label_selector=chal_selector
-            ).items
+            namespace=get_namespace(), label_selector=chal_selector
+        ).items
         service = services[0]
         ports = [port.node_port for port in service.spec.ports]
         pods = KubernetesUtils.v1.list_namespaced_pod(
-                namespace="default", label_selector=chal_selector
-            ).items
+            namespace=get_namespace(), label_selector=chal_selector
+        ).items
         target_node_name = pods[0].spec.node_name
         nodes = KubernetesUtils.v1.list_node()
         node = [n for n in nodes.items if n.metadata.name == target_node_name][0]
         external_ip = [
-                addr.address
-                for addr in node.status.addresses
-                if addr.type == "ExternalIP"
-            ][0]
+            addr.address for addr in node.status.addresses if addr.type == "ExternalIP"
+        ][0]
         return external_ip, ports
 
     @staticmethod
@@ -109,4 +111,6 @@ class KubernetesUtils:
         chal_id, short_id = get_challenge_id(container)
         chal_selector = f"chal-id={chal_id}"
         with get_templated_yaml(container) as tmpf:
-            subprocess.run(["kubectl", "delete", "-f", tmpf.name])
+            subprocess.run(
+                ["kubectl", "delete", "-f", tmpf.name, "--namespace", get_namespace()]
+            )

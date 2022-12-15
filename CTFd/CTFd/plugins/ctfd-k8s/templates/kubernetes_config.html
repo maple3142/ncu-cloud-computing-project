@@ -24,7 +24,8 @@
         <form method="POST" accept-charset="utf-8" action="/admin/plugins/ctfd-kubernetes"
               class="form-horizontal">
             <div class="tab-content">
-                {% include "config/docker.config.html" %}
+                <!-- {% include "config/docker.config.html" %} -->
+                {% include "config/kubernetes.config.html" %}
                 {% include "config/base.router.config.html" %}
                 {% include "config/limits.config.html" %}
                 {% include "config/challenges.config.html" %}

@@ -22,6 +22,7 @@ def setup_default_configs():
         'frp_direct_port_minimum': '10000',
         'template_http_subdomain': '{{ container.uuid }}',
         'template_chall_flag': '{{ "flag{"+uuid.uuid4()|string+"}" }}',
+        'kubernetes_namespace': 'default',
     }.items():
         set_config('kubernetes:' + key, val)
     db.session.add(KubernetesRedirectTemplate(
