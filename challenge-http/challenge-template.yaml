@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: challenge-hello-world-pod-{short_id}
+  labels:
+    chal-id: '{id}'
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - name: chal
+    image: 971703668052.dkr.ecr.us-east-1.amazonaws.com/challenge-registry:challenge-http
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 8000
+      name: service-port
+    env:
+    - name: FLAG
+      value: {flag}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: challenge-hello-world-service-{short_id}
+  labels:
+    chal-id: '{id}'
+spec:
+  selector:
+    chal-id: '{id}'
+  type: NodePort
+  ports:
+  - name: service-1
+    port: 8763  # doesn't really matter in this case
+    targetPort: service-port
+    # do not choose nodePort
+  - name: service-2
+    port: 8764  # doesn't really matter in this case
+    targetPort: service-port
+    # do not choose nodePort
