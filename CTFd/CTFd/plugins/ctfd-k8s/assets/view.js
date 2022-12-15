@@ -67,9 +67,6 @@ function loadInfo() {
                         <h6 class="card-subtitle mb-2 text-muted" id="kubernetes-challenge-count-down">
                             Remaining Time: ${response.remaining_time}s
                         </h6>
-                        <h6 class="card-subtitle mb-2 text-muted">
-                            Lan Domain: ${response.lan_domain}
-                        </h6>
                         <p id="user-access" class="card-text"></p>
                         <button type="button" class="btn btn-danger card-link" id="kubernetes-button-destroy"
                                 onclick="CTFd._internal.challenge.destroy()">
