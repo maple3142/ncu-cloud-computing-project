@@ -29,15 +29,30 @@ services:
         default:
         internal:
 
+  # nginx_orig:
+  #   image: nginx:stable
+  #   restart: always
+  #   volumes:
+  #     - ./conf/nginx/http.conf:/etc/nginx/nginx.conf
+  #   ports:
+  #     - 80:80
+  #   depends_on:
+  #     - ctfd
+
   nginx:
-    image: nginx:stable
+    image: jonasal/nginx-certbot:latest
     restart: always
+    environment:
+      - CERTBOT_EMAIL=konpeko@gmail.com
     volumes:
-      - ./conf/nginx/http.conf:/etc/nginx/nginx.conf
+      - ../nginx_secrets:/etc/letsencrypt
+      - ../user_conf.d:/etc/nginx/user_conf.d:ro
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - ctfd
+
 
   db:
     image: mariadb:10.4.12
