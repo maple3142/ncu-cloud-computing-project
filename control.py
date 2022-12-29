@@ -3,6 +3,7 @@ from tempfile import NamedTemporaryFile
 from kubernetes import client, config
 import sys
 from hashlib import sha256
+import time
 
 template_file = sys.argv[1]
 chal_id = sys.argv[2]
@@ -31,12 +32,21 @@ with NamedTemporaryFile("w", suffix=".yaml") as tmpf:
                 f"{service.metadata.name} {[(p.node_port, p.port, p.target_port) for p in service.spec.ports]}"
             )
             node_port = service.spec.ports[0].node_port
-            pods = v1.list_namespaced_pod(
-                namespace="default", label_selector=chal_selector
-            ).items
-            target_node_name = pods[0].spec.node_name
-            nodes = v1.list_node()
-            node = [n for n in nodes.items if n.metadata.name == target_node_name][0]
+            while True:
+                pods = v1.list_namespaced_pod(
+                    namespace="default", label_selector=chal_selector
+                ).items
+                target_node_name = pods[0].spec.node_name
+                nodes = v1.list_node()
+                good_nodes = [
+                    n for n in nodes.items if n.metadata.name == target_node_name
+                ]
+                if len(good_nodes) == 0:
+                    time.sleep(5)
+                    print("Waiting for auto scaling...")
+                    continue
+                node = good_nodes[0]
+                break
             external_ip = [
                 addr.address
                 for addr in node.status.addresses
