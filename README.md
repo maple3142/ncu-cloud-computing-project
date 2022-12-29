@@ -69,3 +69,22 @@ docker push $ECRHOST/challenge-registry:challenge-hello-world
 > P.S. Do not fill static flag if you need to use dynamicly generated flag
 
 ![](imgs/hello-world.png)
+
+
+## Auto Scaling
+
+Ensure that your node group is allowed to have more than 1 nodes, then
+
+```bash
+curl -O https://raw.githubusercontent.com/kubernetes/autoscaler/master/cluster-autoscaler/cloudprovider/aws/examples/cluster-autoscaler-autodiscover.yaml
+sed -i 's/<YOUR CLUSTER NAME>/YOUR_EKS_CLUSTER_NAME_HERE/' cluster-autoscaler-autodiscover.yaml
+kubectl apply -f cluster-autoscaler-autodiscover.yaml
+```
+
+> Ref: [Deploy the Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html#ca-deploy)
+
+To test, you can try create a lot of challenge instances with [control.py](./control.py):
+
+```bash
+for i in $(seq 1 20); do python control.py ./challenge-hello-world/challenge-template.yaml $i apply; done
+```
